@@ -8,5 +8,6 @@
 //`define SPARTAN3A
 //`define VIRTEX
 //`define VIRTEX2  // Also used for the VIRTEX 2P
-`define VIRTEX4
+//`define VIRTEX4
 //`define VIRTEX5
+`define SPARTAN6
