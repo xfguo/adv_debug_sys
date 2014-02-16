@@ -399,7 +399,7 @@ BSCAN_VIRTEX5 #(
 ) BSCAN_VIRTEX5_inst (
 .CAPTURE(capture_dr_o), // CAPTURE output from TAP controller
 .DRCK(drck), // Data register output for USER function
-.RESET(test_logic_reset), // Reset output from TAP controller
+.RESET(test_logic_reset_o), // Reset output from TAP controller
 .SEL(debug_select_o), // USER active output
 .SHIFT(shift_dr_o), // SHIFT output from TAP controller
 .TDI(tdi_o), // TDI output from TAP controller
@@ -440,7 +440,7 @@ BSCAN_SPARTAN6 #(
 ) BSCAN_SPARTAN6_inst (
     .CAPTURE(capture_dr_o),     // CAPTURE output from TAP controller
     .DRCK(drck),                // Data register output for USER function
-    .RESET(test_logic_reset),   // Reset output from TAP controller
+    .RESET(test_logic_reset_o),   // Reset output from TAP controller
     .SEL(debug_select_o),       // USER active output
     .SHIFT(shift_dr_o),         // SHIFT output from TAP controller
     .TCK(tck_o),
