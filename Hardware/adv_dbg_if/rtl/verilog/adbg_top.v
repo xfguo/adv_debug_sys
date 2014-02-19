@@ -250,13 +250,15 @@ begin
     module_id_reg <= 2'b0;
   else if(debug_select_i && select_cmd && update_dr_i && !select_inhibit)       // Chain select
     module_id_reg <= module_id_in;
+  else
+    module_id_reg <= module_id_reg;
 end
 
 
 always @ (module_id_reg)
 begin
-	module_selects <= `DBG_TOP_MODULE_ID_LENGTH'h0;
-	module_selects[module_id_reg] <= 1'b1;
+	module_selects = `DBG_TOP_MAX_MODULES'h0;
+	module_selects[module_id_reg] = 1'b1;
 end
 
 ///////////////////////////////////////////////
@@ -268,6 +270,8 @@ begin
     input_shift_reg <= 53'h0;
   else if(debug_select_i && shift_dr_i)
     input_shift_reg <= {tdi_i, input_shift_reg[52:1]};
+  else
+    input_shift_reg <= input_shift_reg;
 end
 
 
@@ -437,11 +441,11 @@ assign select_inhibit = |module_inhibit;
 always @ (module_id_reg or tdo_wb or tdo_cpu0 or tdo_cpu1 or tdo_jsp)
 begin
    case (module_id_reg)
-     `DBG_TOP_WISHBONE_DEBUG_MODULE: tdo_o <= tdo_wb;
-     `DBG_TOP_CPU0_DEBUG_MODULE:     tdo_o <= tdo_cpu0;
-     `DBG_TOP_CPU1_DEBUG_MODULE:     tdo_o <= tdo_cpu1;
-     `DBG_TOP_JSP_DEBUG_MODULE:      tdo_o <= tdo_jsp;
-       default:                        tdo_o <= 1'b0;
+     `DBG_TOP_WISHBONE_DEBUG_MODULE: tdo_o = tdo_wb;
+     `DBG_TOP_CPU0_DEBUG_MODULE:     tdo_o = tdo_cpu0;
+     `DBG_TOP_CPU1_DEBUG_MODULE:     tdo_o = tdo_cpu1;
+     `DBG_TOP_JSP_DEBUG_MODULE:      tdo_o = tdo_jsp;
+     default:                        tdo_o = 1'b0;
    endcase
 end
 

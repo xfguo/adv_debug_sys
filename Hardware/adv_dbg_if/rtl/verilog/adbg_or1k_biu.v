@@ -144,11 +144,18 @@ module adbg_or1k_biu
 	   data_in_reg <= 32'h0;
 	   wr_reg <= 1'b0;
 	end
-	else
-	  if(strobe_i && rdy_o) begin
+	else if(strobe_i && rdy_o) begin
 	     addr_reg <= addr_i;
-	     if(!rd_wrn_i) data_in_reg <= data_i;
+	     if(!rd_wrn_i) 
+             data_in_reg <= data_i;
+         else
+             data_in_reg <= data_in_reg;
 	     wr_reg <= ~rd_wrn_i;
+    end
+    else begin
+	     addr_reg <= addr_reg;
+         data_in_reg <= data_in_reg;
+	     wr_reg <= wr_reg;
 	  end 
      end
 
@@ -158,6 +165,7 @@ module adbg_or1k_biu
      begin
 	if(rst_i) str_sync <= 1'b0;
 	else if(strobe_i && rdy_o) str_sync <= ~str_sync;
+	else str_sync <= str_sync;
      end 
 
    // Create rdy_o output.  Set on reset, clear on strobe (if set), set on input toggle
@@ -176,6 +184,7 @@ module adbg_or1k_biu
 
 	   if(strobe_i && rdy_o) rdy_o <= 1'b0;
 	   else if(rdy_sync_tff2 != rdy_sync_tff2q) rdy_o <= 1'b1;
+	   else rdy_o <= rdy_o;
 	end
 
      end 
@@ -216,6 +225,7 @@ module adbg_or1k_biu
      begin
 	if(rst_i) data_out_reg <= 32'h0;
 	else if(data_o_en) data_out_reg <= cpu_data_i;
+	else data_out_reg <= data_out_reg;
      end
 
    // Create a toggle-active ready signal to send to the TCK domain
@@ -223,6 +233,7 @@ module adbg_or1k_biu
      begin
 	if(rst_i) rdy_sync <= 1'b0;
 	else if(rdy_sync_en) rdy_sync <= ~rdy_sync;
+	else rdy_sync <= rdy_sync;
      end 
 
    /////////////////////////////////////////////////////
@@ -250,13 +261,13 @@ module adbg_or1k_biu
 	case (cpu_fsm_state)
           `STATE_IDLE:
             begin
-               if(start_toggle && !cpu_ack_i) next_fsm_state <= `STATE_TRANSFER;  // Don't go to next state for 1-cycle transfer
-               else next_fsm_state <= `STATE_IDLE;
+               if(start_toggle && !cpu_ack_i) next_fsm_state = `STATE_TRANSFER;  // Don't go to next state for 1-cycle transfer
+               else next_fsm_state = `STATE_IDLE;
             end
           `STATE_TRANSFER:
             begin
-               if(cpu_ack_i) next_fsm_state <= `STATE_IDLE;
-               else next_fsm_state <= `STATE_TRANSFER;
+               if(cpu_ack_i) next_fsm_state = `STATE_IDLE;
+               else next_fsm_state = `STATE_TRANSFER;
             end
 	endcase
      end
@@ -264,31 +275,31 @@ module adbg_or1k_biu
    // Outputs of state machine (combinatorial)
    always @ (cpu_fsm_state or start_toggle or cpu_ack_i or wr_reg)
      begin
-	rdy_sync_en <= 1'b0;
-	data_o_en <= 1'b0;
-	cpu_stb_o <= 1'b0;
+	rdy_sync_en = 1'b0;
+	data_o_en = 1'b0;
+	cpu_stb_o = 1'b0;
 	
 	case (cpu_fsm_state)
           `STATE_IDLE:
             begin
                if(start_toggle) begin
-		  cpu_stb_o <= 1'b1;
+		  cpu_stb_o = 1'b1;
 		  if(cpu_ack_i) begin
-                     rdy_sync_en <= 1'b1;
+                     rdy_sync_en = 1'b1;
 		  end
 		  
 		  if (cpu_ack_i && !wr_reg) begin  // latch read data
-                     data_o_en <= 1'b1;
+                     data_o_en = 1'b1;
 		  end
                end
             end
 
           `STATE_TRANSFER:
             begin
-               cpu_stb_o <= 1'b1;  // OR1K behavioral model needs this.  OR1200 should be indifferent.
+               cpu_stb_o = 1'b1;  // OR1K behavioral model needs this.  OR1200 should be indifferent.
                if(cpu_ack_i) begin
-                  data_o_en <= 1'b1;
-                  rdy_sync_en <= 1'b1;
+                  data_o_en = 1'b1;
+                  rdy_sync_en = 1'b1;
                end
             end
 	endcase

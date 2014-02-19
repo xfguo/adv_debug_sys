@@ -112,6 +112,8 @@ module adbg_or1k_status_reg  (
 	  stall_bp <= 1'b1;
 	else if(stall_reg_cpu)
 	  stall_bp <= 1'b0;
+	else
+	  stall_bp <= stall_bp;
      end
 
 
@@ -162,6 +164,8 @@ module adbg_or1k_status_reg  (
 	  stall_reg <= 1'b1;
 	else if (we_i)
 	  stall_reg <= data_i[0];
+	else
+	  stall_reg <= stall_reg;
      end
 
 
@@ -172,6 +176,8 @@ module adbg_or1k_status_reg  (
 	  cpu_reset  <= 1'b0;
 	else if(we_i)
 	  cpu_reset  <= data_i[1];
+    else
+	  cpu_reset  <= cpu_reset;
      end
 
 
