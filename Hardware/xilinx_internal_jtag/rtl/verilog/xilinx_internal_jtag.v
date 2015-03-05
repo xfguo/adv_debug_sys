@@ -508,22 +508,22 @@ assign run_test_idle_o = 1'b0;
 // This will hold the update_dr output so it can be registered on the rising edge
 // of the clock created above.
 
-always @(posedge update_bscan or posedge capture_dr_o or negedge debug_select_o)
-begin
-	if(update_bscan) update_out <= 1'b1;
-	else if(capture_dr_o) update_out <= 1'b0;
-	else if(!debug_select_o) update_out <= 1'b0;
-end
-assign update_dr_o = update_out;
-// LDCE #(
-// 	.INIT(1'b0)
-// ) LDCE_tap_latch (
-// 	.Q(update_dr_o),
-// 	.CLR( (capture_dr_o) || (!debug_select_o) ),
-// 	.D(1'b1),
-// 	.G(update_bscan),
-// 	.GE(1'b1)
-// );
+// always @(posedge update_bscan or posedge capture_dr_o or negedge debug_select_o)
+// begin
+// 	if(update_bscan) update_out <= 1'b1;
+// 	else if(capture_dr_o) update_out <= 1'b0;
+// 	else if(!debug_select_o) update_out <= 1'b0;
+// end
+// assign update_dr_o = update_out;
+LDCE #(
+	.INIT(1'b0)
+) LDCE_tap_latch (
+	.Q(update_dr_o),
+	.CLR( (capture_dr_o) || (!debug_select_o) ),
+	.D(1'b1),
+	.G(update_bscan),
+	.GE(1'b1)
+);
 
 `endif
 `endif
