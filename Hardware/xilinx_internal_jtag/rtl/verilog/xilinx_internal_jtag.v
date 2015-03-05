@@ -468,7 +468,64 @@ begin
 end
 
 assign update_dr_o = update_out;
+`else
+`ifdef ARTIX7
+// Note that this version is missing two outputs.
+// It also does not have a real TCK...DRCK is only active when USERn is selected.
 
+wire capture_dr_o;
+wire update_bscan;
+reg update_out;
+
+BSCANE2 #(
+.JTAG_CHAIN(virtex_jtag_chain) 
+) BSCANE2_inst (
+    .CAPTURE(capture_dr_o),     // CAPTURE output from TAP controller
+    .DRCK(drck),                // Data register output for USER function
+    .RESET(test_logic_reset_o),   // Reset output from TAP controller
+    .SEL(debug_select_o),       // USER active output
+    .SHIFT(shift_dr_o),         // SHIFT output from TAP controller
+    .TCK(tck_o),
+    .TDI(tdi_o),                // TDI output from TAP controller
+    .TMS(),
+    .UPDATE(update_bscan),      // UPDATE output from TAP controller
+    .TDO(debug_tdo_i)           // Data input for USER function
+);
+
+assign pause_dr_o = 1'b0;
+assign run_test_idle_o = 1'b0;
+
+// The & !update_bscan tern will provide a clock edge so update_dr_o can be registered
+// The &debug_select term will drop TCK when the module is un-selected (does not happen in the BSCAN block).
+// This allows a user to kludge clock ticks in the IDLE state, which is needed by the advanced debug module.
+
+// assign tck_o = (drck & debug_select_o & !update_bscan);
+// BUFG BUFG_tap (
+// 	.I(drck & debug_select_o & (!update_bscan)),
+// 	.O(tck_o)
+// );
+
+// This will hold the update_dr output so it can be registered on the rising edge
+// of the clock created above.
+
+always @(posedge update_bscan or posedge capture_dr_o or negedge debug_select_o)
+begin
+	if(update_bscan) update_out <= 1'b1;
+	else if(capture_dr_o) update_out <= 1'b0;
+	else if(!debug_select_o) update_out <= 1'b0;
+end
+assign update_dr_o = update_out;
+// LDCE #(
+// 	.INIT(1'b0)
+// ) LDCE_tap_latch (
+// 	.Q(update_dr_o),
+// 	.CLR( (capture_dr_o) || (!debug_select_o) ),
+// 	.D(1'b1),
+// 	.G(update_bscan),
+// 	.GE(1'b1)
+// );
+
+`endif
 `endif
 `endif
 `endif
